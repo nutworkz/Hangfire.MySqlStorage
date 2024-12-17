@@ -41,11 +41,11 @@ namespace Hangfire.MySql
             if (job == null) throw new ArgumentNullException("job");
             if (parameters == null) throw new ArgumentNullException("parameters");
 
-            var invocationData = InvocationData.Serialize(job);
+            var invocationData = InvocationData.SerializeJob(job);
 
-            Logger.TraceFormat("CreateExpiredJob={0}", JobHelper.ToJson(invocationData));
+			Logger.TraceFormat("CreateExpiredJob={0}", SerializationHelper.Serialize(invocationData));
 
-            return _storage.UseConnection(connection =>
+			return _storage.UseConnection(connection =>
             {
                 var jobId = connection.Query<int>(
                     $"insert into `{_storageOptions.TablesPrefix}Job` (InvocationData, Arguments, CreatedAt, ExpireAt) " +
@@ -53,8 +53,8 @@ namespace Hangfire.MySql
                     "select last_insert_id();",
                     new
                     {
-                        invocationData = JobHelper.ToJson(invocationData),
-                        arguments = invocationData.Arguments,
+                        invocationData = SerializationHelper.Serialize(invocationData),
+						arguments = invocationData.Arguments,
                         createdAt = createdAt,
                         expireAt = createdAt.Add(expireIn)
                     }).Single().ToString();
@@ -147,16 +147,16 @@ namespace Hangfire.MySql
 
                 if (jobData == null) return null;
 
-                var invocationData = JobHelper.FromJson<InvocationData>(jobData.InvocationData);
-                invocationData.Arguments = jobData.Arguments;
+                var invocationData = SerializationHelper.Deserialize<InvocationData>(jobData.InvocationData);
+				invocationData.Arguments = jobData.Arguments;
 
                 Job job = null;
                 JobLoadException loadException = null;
 
                 try
                 {
-                    job = invocationData.Deserialize();
-                }
+                    job = invocationData.DeserializeJob();
+				}
                 catch (JobLoadException ex)
                 {
                     loadException = ex;
@@ -190,8 +190,8 @@ namespace Hangfire.MySql
                 }
 
                 var data = new Dictionary<string, string>(
-                    JobHelper.FromJson<Dictionary<string, string>>(sqlState.Data),
-                    StringComparer.OrdinalIgnoreCase);
+					SerializationHelper.Deserialize<Dictionary<string, string>>(sqlState.Data),
+					StringComparer.OrdinalIgnoreCase);
 
                 return new StateData
                 {
@@ -216,8 +216,8 @@ namespace Hangfire.MySql
                     new
                     {
                         id = serverId,
-                        data = JobHelper.ToJson(new ServerData
-                        {
+                        data = SerializationHelper.Serialize(new ServerData
+						{
                             WorkerCount = context.WorkerCount,
                             Queues = context.Queues,
                             StartedAt = DateTime.UtcNow,

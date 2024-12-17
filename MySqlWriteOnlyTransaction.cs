@@ -68,8 +68,8 @@ namespace Hangfire.MySql
                     name = state.Name,
                     reason = state.Reason,
                     createdAt = DateTime.UtcNow,
-                    data = JobHelper.ToJson(state.SerializeData()),
-                    id = jobId
+                    data = SerializationHelper.Serialize(state.SerializeData()),
+					id = jobId
                 }));
         }
 
@@ -87,8 +87,8 @@ namespace Hangfire.MySql
                     name = state.Name,
                     reason = state.Reason,
                     createdAt = DateTime.UtcNow,
-                    data = JobHelper.ToJson(state.SerializeData())
-                }));
+                    data = SerializationHelper.Serialize(state.SerializeData())
+				}));
         }
 
         public override void AddToQueue(string queue, string jobId)
