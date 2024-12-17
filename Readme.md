@@ -1,0 +1,1 @@
+MariaDB storage implementation of Hangfire - fire-and-forget, delayed and recurring tasks runner for .NET. Scalable and reliable background job runner. Supports multiple servers, CPU and I/O intensive, long-running and short-running jobs.
