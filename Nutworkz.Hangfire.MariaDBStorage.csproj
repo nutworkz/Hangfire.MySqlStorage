@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <PackageLicenseFile>License.txt</PackageLicenseFile>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
 	<ItemGroup>
